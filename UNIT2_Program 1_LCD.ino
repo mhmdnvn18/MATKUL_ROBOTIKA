@@ -3,21 +3,22 @@
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-void setup() {
+void setup() 
+{
   lcd.init();
-  lcd.backlight();
 }
 
-void loop() {
-  lcd.setCursor(0, 0);
+void loop() 
+{
+  lcd.backlight();
   delay(2000);
-  lcd.print(" LCD I2C Module ");
-  lcd.setCursor(0, 1);
+  lcd.setCursor(0, 0);
   lcd.print("PRAKTIKUM");
+  delay(2000);
+  lcd.setCursor(0, 1);
+  lcd.print("LCD I2C Module");
   delay(8000);
   lcd.clear();
-  delay(2000);
-  lcd.noBacklight();
   delay(8000);
-  lcd.backlight();
+  lcd.noBacklight();
 }
