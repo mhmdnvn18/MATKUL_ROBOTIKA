@@ -4,7 +4,6 @@ const int trigPin = 9;    // Pin trigger sensor HC-SR04
 const int echoPin = 10;   // Pin echo sensor HC-SR04
 const int motorPin1 = 5;  // Pin motor DC 1
 const int motorPin2 = 6;  // Pin motor DC 2
-const int pwmPin = 3;     // Pin PWM motor DC
 
 LiquidCrystal_I2C lcd(0x27, 16, 2); // Alamat I2C dan ukuran LCD LM015L
 
@@ -15,7 +14,6 @@ void setup()
   pinMode(echoPin, INPUT);
   pinMode(motorPin1, OUTPUT);
   pinMode(motorPin2, OUTPUT);
-  pinMode(pwmPin, OUTPUT);
 
   lcd.begin(16, 2); // Inisialisasi LCD
   lcd.print("Distance: ");
@@ -53,7 +51,6 @@ void controlMotor(float distance)
 {
   int motorSpeed = map(distance, 5, 20, 255, 0); // Map jarak ke kecepatan motor
   motorSpeed = constrain(motorSpeed, 0, 255); // Batasi kecepatan antara 0 dan 255
-  analogWrite(pwmPin, motorSpeed);
 
   if (distance < 10) 
   {
@@ -88,4 +85,3 @@ void controlMotor(float distance)
     lcd.print("Go Straight    ");
   }
 }
-
