@@ -1,87 +1,98 @@
-#include <LiquidCrystal_I2C.h>
+#include<Wire.h>
+#include<LiquidCrystal_I2C.h>
+LiquidCrystal_I2C lcd (0x27, 16, 2);
 
-const int trigPin = 9;    // Pin trigger sensor HC-SR04
-const int echoPin = 10;   // Pin echo sensor HC-SR04
-const int motorPin1 = 5;  // Pin motor DC 1
-const int motorPin2 = 6;  // Pin motor DC 2
+#define echoPin A0
+#define trigPin A1
 
-LiquidCrystal_I2C lcd(0x27, 16, 2); // Alamat I2C dan ukuran LCD LM015L
+int kiriA=9;
+int kiriB=6;
+int kananA=5;
+int kananB=3;
 
-void setup() 
-{
-  Serial.begin(9600);
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
-  pinMode(motorPin1, OUTPUT);
-  pinMode(motorPin2, OUTPUT);
+unsigned int waktu;
+float jarak;
 
-  lcd.begin(16, 2); // Inisialisasi LCD
-  lcd.print("Distance: ");
+void setup() {
+  // put your setup code here, to run once:
+Serial.begin(9600);
+pinMode(echoPin,INPUT);
+pinMode(trigPin,OUTPUT);
+pinMode(kiriA,OUTPUT);
+pinMode(kiriB,OUTPUT);
+pinMode(kananA,OUTPUT);
+pinMode(kananB,OUTPUT);
+
+lcd.init();
+lcd.backlight();
+lcd.setCursor(0,0);
+lcd.print("jarak");
 }
 
-void loop() 
+void loop() {
+  // put your main code here, to run repeatedly:
+long duration, inches, cm;
+
+digitalWrite(trigPin,LOW);
+delayMicroseconds(2);
+digitalWrite(trigPin,HIGH);
+delayMicroseconds(10);
+digitalWrite(trigPin,LOW);
+
+waktu=pulseIn(echoPin,HIGH);
+
+jarak=(0.034*waktu)/2;
+
+lcd.setCursor(6,0);
+lcd.print(jarak);
+lcd.print("CM");
+delay(200);
+
+inches=microsecondsToInches(waktu);
+cm=microsecondsToCentimeters(waktu);
+
+Serial.print(inches);
+Serial.print("in,");
+Serial.print(cm);
+Serial.print("cm");
+Serial.println();
+delay(200);
+
+if(jarak<=60)
 {
-  // Baca jarak dari sensor HC-SR04
-  float distance = getDistance();
-  // Tampilkan jarak di LCD
-  lcd.setCursor(0, 1);
-  lcd.print("            "); // Hapus teks sebelumnya
-  lcd.setCursor(0, 1);
-  lcd.print(distance);
-  lcd.print(" cm");
-  // Kontrol motor DC berdasarkan jarak
-  controlMotor(distance);
-  delay(500);
+  analogWrite(kiriA,255);
+  analogWrite(kiriB,0);
+  analogWrite(kananA,0);
+  analogWrite(kananB,255);
+  delay(5000);
+  analogWrite(kiriA,0);
+  analogWrite(kiriB,0);
+  analogWrite(kananA,0);
+  analogWrite(kananB,0);
+  delay(5000);
+
 }
 
-float getDistance() 
+else
 {
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-
-  unsigned long duration = pulseIn(echoPin, HIGH);
-  float distance = duration * 0.034 / 2;
-  return distance;
+  analogWrite(kiriA,0);
+  analogWrite(kiriB,255);
+  analogWrite(kananA,0);
+  analogWrite(kananB,255);
+  delay(5000);
+  analogWrite(kiriA,0);
+  analogWrite(kiriB,0);
+  analogWrite(kananA,0);
+  analogWrite(kananB,0);
+  delay(5000);
+}
 }
 
-void controlMotor(float distance) 
+long microsecondsToInches(long microseconds)
 {
-  int motorSpeed = map(distance, 5, 20, 255, 0); // Map jarak ke kecepatan motor
-  motorSpeed = constrain(motorSpeed, 0, 255); // Batasi kecepatan antara 0 dan 255
-
-  if (distance < 10) 
-  {
-    // Belok ke kiri jika jarak kurang dari 10 cm
-    analogWrite(motorPin1, 50);
-    analogWrite(motorPin2, 0);
-    lcd.setCursor(0, 0);
-    lcd.print("Turn Left      ");
-  } 
-  else if (distance > 20) 
-  {
-    // Belok ke kanan jika jarak lebih dari 20 cm
-    analogWrite(motorPin1, 0);
-    analogWrite(motorPin2, 50);
-    lcd.setCursor(0, 0);
-    lcd.print("Turn Right     ");
-  } 
-  else if (distance < 5) 
-  {
-      // Berhenti jika jarak kurang dari 5 cm
-    analogWrite(motorPin1, 0);
-    analogWrite(motorPin2, 0);
-    lcd.setCursor(0, 0);
-    lcd.print("STOP    ");
-  } 
-  else 
-  {
-     // Jalan lurus jika jarak antara 10 cm dan 20 cm
-    analogWrite(motorPin1, 50);
-    analogWrite(motorPin2, 50);
-    lcd.setCursor(0, 0);
-    lcd.print("Go Straight    ");
-  }
+  return microseconds/74/2;
+}
+long microsecondsToCentimeters(long microseconds)
+{
+  return microseconds/29/2;
 }
