@@ -3,9 +3,9 @@
 AF_DCMotor M3(3); // KIRI
 AF_DCMotor M4(4); // KANAN
 
-int R_S = A1; // SENSOR KANAN
+int R_S = A0; // SENSOR KANAN
 int S_S = A2; // SENSOR TENGAH
-int L_S = A0; // SENSOR KIRI
+int L_S = A1; // SENSOR KIRI
 
 void setup() {
   // put your setup code here, to run once:
@@ -13,8 +13,8 @@ void setup() {
   pinMode(S_S, INPUT);
   pinMode(R_S, INPUT);
 
-  M3.setSpeed(250);
-  M4.setSpeed(250);
+  M3.setSpeed(200);
+  M4.setSpeed(200);
 
   Serial.begin(9600);
 }
@@ -33,6 +33,8 @@ void loop() {
     turnRight();
   } else if ((digitalRead(L_S) == LOW) && (digitalRead(S_S) == LOW) && (digitalRead(R_S) == HIGH)) {
     turnRight();
+  } else if ((digitalRead(L_S) == LOW) && (digitalRead(S_S) == LOW) && (digitalRead(R_S) == LOW)) {
+    stop();  
   }
 
   Serial.print(digitalRead(L_S));
@@ -41,14 +43,14 @@ void loop() {
 }
 
 void forward() {
-  M3.setSpeed(250);
-  M4.setSpeed(250);
+  M3.setSpeed(200);
+  M4.setSpeed(200);
   M3.run(FORWARD);
   M4.run(FORWARD);
 }
 
 void turnRight() {
-  M3.setSpeed(250);
+  M3.setSpeed(200);
   M4.setSpeed(50);
   M3.run(FORWARD);
   M4.run(BACKWARD);
@@ -56,7 +58,14 @@ void turnRight() {
 
 void turnLeft() {
   M3.setSpeed(50);
-  M4.setSpeed(250);
+  M4.setSpeed(200);
   M3.run(BACKWARD);
   M4.run(FORWARD);
+}
+
+void stop() {
+  M3.setSpeed(0);
+  M4.setSpeed(0);
+  M3.run(RELEASE);
+  M4.run(RELEASE);
 }
